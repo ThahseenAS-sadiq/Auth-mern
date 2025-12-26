@@ -19,7 +19,6 @@ const Login = () => {
     const onSubmitHandler = async (e) => {
         try {
             e.preventDefault();
-            axios.defaults.withCredentials = true;
 
             if (state === "Sign up") {
                 const { data } = await axios.post(
@@ -29,7 +28,6 @@ const Login = () => {
 
                 if (data.success) {
                     toast.success("Account registered successfully. Please login ✅");
-
                     setName("");
                     setEmail("");
                     setPassword("");
@@ -46,6 +44,11 @@ const Login = () => {
 
                 if (data.success) {
                     toast.success("Login successful 🎉");
+
+                    localStorage.setItem("token", data.token);
+                    axios.defaults.headers.common["Authorization"] =
+                        `Bearer ${data.token}`;
+
                     setIsLoggedin(true);
                     await getUserData();
                     navigate("/");
@@ -55,11 +58,10 @@ const Login = () => {
             }
 
         } catch (error) {
-            toast.error(
-                error.response?.data?.message || "Something went wrong"
-            );
+            toast.error(error.response?.data?.message || "Something went wrong");
         }
     };
+
 
 
     return (

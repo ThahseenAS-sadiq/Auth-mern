@@ -1,18 +1,21 @@
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 
-
 export const AppContent = createContext(null);
 
 export const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
+
+  // ✅ AXIOS GLOBAL CONFIG (TOP)
+  axios.defaults.baseURL = backendUrl;
+  axios.defaults.withCredentials = true;
 
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
 
   const getUserData = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/user/data");
+      const { data } = await axios.get("/api/user/data");
       if (data.success) {
         setUserData(data.userData);
       }
@@ -26,18 +29,24 @@ export const AppContextProvider = (props) => {
 
   const getAuthState = async () => {
     try {
-      const { data } = await axios.get(backendUrl + "/api/auth/is-auth");
+      const { data } = await axios.get("/api/auth/is-auth");
       if (data.success) {
         setIsLoggedin(true);
         await getUserData();
       }
     } catch {
-      // silent fail
+      setIsLoggedin(false);
     }
   };
 
+  // ✅ SET TOKEN FIRST, THEN CALL AUTH CHECK
   useEffect(() => {
-    getAuthState();
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      getAuthState();
+    }
   }, []);
 
   const value = {
@@ -49,14 +58,12 @@ export const AppContextProvider = (props) => {
     getUserData,
   };
 
-  axios.defaults.baseURL = backendUrl;
-  axios.defaults.withCredentials = true;
-
   return (
     <AppContent.Provider value={value}>
       {props.children}
     </AppContent.Provider>
   );
 };
+
 
 
