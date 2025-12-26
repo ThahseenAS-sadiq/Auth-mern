@@ -137,7 +137,7 @@ const EmailVerify = () => {
 
         <button
           type="submit"
-          className="w-full py-2.5 rounded-full bg-gradient-to-r from-red-500 to-red-900 text-white font-medium transition-all duration-300 hover:scale-105"
+          className="w-full py-2.5 rounded-full bg-linear-to-r from-red-500 to-red-900 text-white font-medium transition-all duration-300 hover:scale-105"
         >
           Verify Email
         </button>
