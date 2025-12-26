@@ -7,27 +7,32 @@ import { toast } from 'react-toastify';
 
 const Navbar = () => {
 
-    const navigate = useNavigate()
-    const {userData, backendUrl, setUserData, setIsLoggedin} = useContext(AppContent)
+    const navigate = useNavigate();
+    const { userData, backendUrl } = useContext(AppContent);
 
-    const sendVerificationOtp = async ()=> {
+    const sendVerificationOtp = async () => {
         try {
-            axios.defaults.withCredentials = true;
+            // ❌ DO NOT use withCredentials
 
-            const {data} = await axios.post(backendUrl + '/api/auth/send-verify-otp')
+            const { data } = await axios.post(
+                backendUrl + "/api/auth/send-verify-otp"
+            );
 
-            if(data.success){
-                navigate('/email-verify')
-                toast.success(data.message)
-            }else{
-                toast.error(data.message)
+            if (data.success) {
+                toast.success(data.message);
+                navigate("/email-verify");
+            } else {
+                toast.error(data.message);
             }
         } catch (error) {
-            toast.error(error.message)
+            toast.error(
+                error.response?.data?.message || "Failed to send verification OTP"
+            );
         }
-    }
+    };
 
-    const logout = async ()=> {
+
+    const logout = async () => {
         try {
             axios.defaults.withCredentials = true;
             const { data } = await axios.post(backendUrl + '/api/auth/logout')
@@ -54,11 +59,11 @@ const Navbar = () => {
                         <li onClick={logout} className='py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10' >Logout</li>
                     </ul>
                 </div>
-            </div> : <button onClick={()=> navigate('/login')}
-            className='flex items-center gap-2 px-8 py-2.5 rounded bg-[#e50914] text-white font-medium border border-transparent transition-all duration-300 hover:bg-[#f6121d] hover:border-white hover:scale-[1.03] active:scale-100'
+            </div> : <button onClick={() => navigate('/login')}
+                className='flex items-center gap-2 px-8 py-2.5 rounded bg-[#e50914] text-white font-medium border border-transparent transition-all duration-300 hover:bg-[#f6121d] hover:border-white hover:scale-[1.03] active:scale-100'
             >Login <img src={assets.arrow_icon} alt="" /> </button>
             }
-            
+
         </div>
     )
 }
