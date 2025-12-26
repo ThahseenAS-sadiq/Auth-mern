@@ -17,23 +17,10 @@ connectDB();
 app.use(express.json());
 app.use(cookieParser());
 
-/* -------------------- CORS CONFIG -------------------- */
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5175",
-  process.env.FRONTEND_URL, // Vercel frontend URL
-];
-
+/* -------------------- CORS (PRODUCTION SAFE) -------------------- */
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (Postman, mobile apps, etc.)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -50,3 +37,4 @@ app.use("/api/user", userRouter);
 app.listen(PORT, () => {
   console.log(`✅ Server started on PORT: ${PORT}`);
 });
+

@@ -1,12 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 
-axios.defaults.withCredentials = true;
 
 export const AppContent = createContext(null);
 
 export const AppContextProvider = (props) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
 
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -49,6 +48,9 @@ export const AppContextProvider = (props) => {
     setUserData,
     getUserData,
   };
+
+  axios.defaults.baseURL = backendUrl;
+  axios.defaults.withCredentials = true;
 
   return (
     <AppContent.Provider value={value}>
