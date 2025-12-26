@@ -6,9 +6,8 @@ export const AppContent = createContext(null);
 export const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "";
 
-  // ✅ AXIOS GLOBAL CONFIG (TOP)
+  // ✅ AXIOS GLOBAL CONFIG
   axios.defaults.baseURL = backendUrl;
-  axios.defaults.withCredentials = true;
 
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
@@ -64,6 +63,7 @@ export const AppContextProvider = (props) => {
     </AppContent.Provider>
   );
 };
+
 
 
 
