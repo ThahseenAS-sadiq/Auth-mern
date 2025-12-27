@@ -63,7 +63,7 @@ const EmailVerify = () => {
         return;
       }
 
-      const { data } = await axios.post(
+      const response = await axios.post(
         backendUrl + "/api/auth/verify-account",
         { otp },
         {
@@ -73,15 +73,27 @@ const EmailVerify = () => {
         }
       );
 
-      if (data.success) {
-        toast.success(data.message || "Email verified successfully");
+      if (response.data.success) {
+        toast.success("Email verified successfully");
         await getUserData();
         navigate("/");
       } else {
-        toast.error(data.message);
+        toast.error(response.data.message);
       }
+
     } catch (error) {
-      toast.error(error.response?.data?.message || "Verification failed");
+
+      // ✅ NETWORK CHANGE HANDLING
+      if (
+        error.message?.includes("ERR_NETWORK_CHANGED") ||
+        error.code === "ERR_NETWORK"
+      ) {
+        toast.error("Network changed. Please check your internet and try again.");
+      } else {
+        toast.error(
+          error.response?.data?.message || "Verification failed"
+        );
+      }
     }
   };
 

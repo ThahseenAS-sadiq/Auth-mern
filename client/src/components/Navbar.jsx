@@ -26,7 +26,7 @@ const Navbar = () => {
         return;
       }
 
-      const { data } = await axios.post(
+      const response = await axios.post(
         backendUrl + "/api/auth/send-verify-otp",
         {},
         {
@@ -36,18 +36,29 @@ const Navbar = () => {
         }
       );
 
-      if (data.success) {
-        toast.success(data.message || "OTP sent to your email");
+      if (response.data.success) {
+        toast.success(response.data.message || "OTP sent");
         navigate("/email-verify");
       } else {
-        toast.error(data.message);
+        toast.error(response.data.message);
       }
+
     } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Failed to send verification OTP"
-      );
+
+      // ✅ NETWORK CHANGE HANDLING
+      if (
+        error.message?.includes("ERR_NETWORK_CHANGED") ||
+        error.code === "ERR_NETWORK"
+      ) {
+        toast.error("Network changed. Please check your internet and try again.");
+      } else {
+        toast.error(
+          error.response?.data?.message || "Failed to send verification OTP"
+        );
+      }
     }
   };
+
 
   /* ---------------- LOGOUT ---------------- */
 
@@ -85,7 +96,7 @@ const Navbar = () => {
               {!userData.isAccountVerified && (
                 <li
                   onClick={sendVerificationOtp}
-                  className="py-1 px-3 hover:bg-gray-200 cursor-pointer rounded"
+                  className="py-1 px-3 hover:bg-gray-200 text-sm cursor-pointer rounded"
                 >
                   Verify email
                 </li>
@@ -93,7 +104,7 @@ const Navbar = () => {
 
               <li
                 onClick={logout}
-                className="py-1 px-3 hover:bg-gray-200 cursor-pointer rounded"
+                className="py-1 px-3 hover:bg-gray-200 text-sm cursor-pointer rounded"
               >
                 Logout
               </li>
