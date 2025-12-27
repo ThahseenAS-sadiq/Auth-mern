@@ -8,7 +8,6 @@ import { toast } from "react-toastify";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  // ✅ FIX: include setters
   const {
     userData,
     backendUrl,
@@ -20,12 +19,25 @@ const Navbar = () => {
 
   const sendVerificationOtp = async () => {
     try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Please login again");
+        return;
+      }
+
       const { data } = await axios.post(
-        backendUrl + "/api/auth/send-verify-otp"
+        backendUrl + "/api/auth/send-verify-otp",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (data.success) {
-        toast.success(data.message);
+        toast.success(data.message || "OTP sent to your email");
         navigate("/email-verify");
       } else {
         toast.error(data.message);
@@ -40,7 +52,6 @@ const Navbar = () => {
   /* ---------------- LOGOUT ---------------- */
 
   const logout = () => {
-    // ✅ JWT logout is CLIENT SIDE
     localStorage.removeItem("token");
     delete axios.defaults.headers.common["Authorization"];
 
@@ -54,24 +65,27 @@ const Navbar = () => {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0">
+    <div className="w-full flex justify-between items-center p-4 sm:p-6 sm:px-24 absolute top-0 z-50">
+      {/* Logo */}
       <img
         src={assets.logo_net}
         alt="Logo"
-        className="w-28 sm:w-32"
+        className="w-28 sm:w-32 cursor-pointer"
+        onClick={() => navigate("/")}
       />
 
       {userData ? (
-        <div className="flex justify-center items-center w-8 h-8 rounded-full bg-red-600 text-white relative group">
-          {userData.name[0].toUpperCase()}
+        <div className="flex justify-center items-center w-9 h-9 rounded-full bg-red-600 text-white relative group cursor-pointer">
+          {userData.name?.[0]?.toUpperCase()}
 
+          {/* Dropdown */}
           <div className="absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-10">
-            <ul className="list-none m-0 p-2 bg-gray-100 text-sm">
+            <ul className="list-none m-0 p-2 bg-gray-100 text-sm rounded shadow-md">
 
               {!userData.isAccountVerified && (
                 <li
                   onClick={sendVerificationOtp}
-                  className="py-1 px-2 hover:bg-gray-200 cursor-pointer"
+                  className="py-1 px-3 hover:bg-gray-200 cursor-pointer rounded"
                 >
                   Verify email
                 </li>
@@ -79,7 +93,7 @@ const Navbar = () => {
 
               <li
                 onClick={logout}
-                className="py-1 px-2 hover:bg-gray-200 cursor-pointer pr-10"
+                className="py-1 px-3 hover:bg-gray-200 cursor-pointer rounded"
               >
                 Logout
               </li>
@@ -92,7 +106,8 @@ const Navbar = () => {
           onClick={() => navigate("/login")}
           className="flex items-center gap-2 px-8 py-2.5 rounded bg-[#e50914] text-white font-medium transition-all duration-300 hover:scale-[1.03]"
         >
-          Login <img src={assets.arrow_icon} alt="" />
+          Login
+          <img src={assets.arrow_icon} alt="" />
         </button>
       )}
     </div>
@@ -100,4 +115,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

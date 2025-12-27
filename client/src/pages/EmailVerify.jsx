@@ -14,21 +14,18 @@ const EmailVerify = () => {
 
   /* ---------------- INPUT HANDLERS ---------------- */
 
-  // Move forward after entering a digit
   const handleInput = (e, index) => {
-    if (e.target.value.length > 0 && index < inputRefs.current.length - 1) {
+    if (e.target.value.length > 0 && index < 5) {
       inputRefs.current[index + 1].focus();
     }
   };
 
-  // Move backward on backspace
   const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace" && e.target.value === "" && index > 0) {
+    if (e.key === "Backspace" && !e.target.value && index > 0) {
       inputRefs.current[index - 1].focus();
     }
   };
 
-  // Paste OTP (all digits at once)
   const handlePaste = (e) => {
     e.preventDefault();
     const paste = e.clipboardData
@@ -42,25 +39,38 @@ const EmailVerify = () => {
       }
     });
 
-    inputRefs.current[Math.min(paste.length, 5)]?.focus();
+    inputRefs.current[paste.length - 1]?.focus();
   };
 
-  /* ---------------- SUBMIT HANDLER ---------------- */
+  /* ---------------- SUBMIT ---------------- */
 
   const onSubmitHandler = async (e) => {
+    e.preventDefault();
+
+    const otp = inputRefs.current.map((el) => el.value).join("");
+
+    if (otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit OTP");
+      return;
+    }
+
     try {
-      e.preventDefault();
+      const token = localStorage.getItem("token");
 
-      const otp = inputRefs.current.map((el) => el.value).join("");
-
-      if (otp.length !== 6) {
-        toast.error("Please enter a valid 6-digit OTP");
+      if (!token) {
+        toast.error("Session expired. Please login again.");
+        navigate("/login");
         return;
       }
 
       const { data } = await axios.post(
         backendUrl + "/api/auth/verify-account",
-        { otp }
+        { otp },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (data.success) {
@@ -104,21 +114,18 @@ const EmailVerify = () => {
 
       {/* OTP Form */}
       <form
-        className="bg-slate-900 p-8 rounded-lg w-[90%] max-w-sm"
         onSubmit={onSubmitHandler}
+        className="bg-slate-900 p-8 rounded-lg w-[90%] max-w-sm"
       >
         <h1 className="text-white text-2xl font-semibold text-center mb-4">
           Email Verification
         </h1>
 
         <p className="text-center mb-6 text-indigo-300">
-          Enter the 6-digit OTP sent to your email.
+          Enter the 6-digit OTP sent to your email
         </p>
 
-        <div
-          className="flex justify-between mb-8"
-          onPaste={handlePaste}
-        >
+        <div className="flex justify-between mb-8" onPaste={handlePaste}>
           {Array(6)
             .fill(0)
             .map((_, index) => (
@@ -126,11 +133,11 @@ const EmailVerify = () => {
                 key={index}
                 type="text"
                 maxLength="1"
-                required
                 className="w-12 h-12 bg-[#333A5C] text-white text-center text-xl rounded-md outline-none"
                 ref={(el) => (inputRefs.current[index] = el)}
                 onInput={(e) => handleInput(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
+                required
               />
             ))}
         </div>
@@ -147,3 +154,5 @@ const EmailVerify = () => {
 };
 
 export default EmailVerify;
+
+
